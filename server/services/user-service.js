@@ -1,9 +1,10 @@
+import {v4 as uuidv4} from 'uuid';
 const bcrypt = require('bcrypt')
 const User = require('../models/user-model')
 const Role = require('../models/role-model')
 
 class UserService {
-    async createUser (email, login, password, rePassword, fullName, role) {
+    async createUser (email, login, password, rePassword, fullName, role, uniq_key) {
         const candidateLogin = await User.findOne({login})
         if(candidateLogin) {
             throw new Error({status: 400, message: 'Користувач з таким лоліном вже створений.'})
@@ -14,6 +15,10 @@ class UserService {
         }
         if (password !== rePassword) {
             throw new Error({status: 400, message: 'Паролі не співпадають.'})
+        }
+        let uuid_key = uuidv4();
+        while(uniq_key == uuid_key) {
+            uuid_key = uuidv4();
         }
         const hashPassword = await bcrypt.hash(password, 5)
         const {value} = new Role({value: role})
